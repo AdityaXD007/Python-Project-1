@@ -1,0 +1,45 @@
+def read_inventory_of_furniture(file_path):
+    # Initialize an empty list to store inventory items
+    inventory = []
+
+    try:
+        # Open the file in read mode with file path
+        file = open(file_path, 'r')
+
+        for line in file:
+            # Remove any trailing whitespace characters
+            line = line.strip()
+
+            if line:
+                # Split the line into parts based on commas
+                parts = line.split(',')
+
+                # To ensure that there are 5 parts exactly (id, manufacturer, product, quantity, price)
+                if len(parts) == 5:
+                    try:
+                        # Assigning values to variables
+                        id = int(parts[0].strip())
+                        manufacturer = parts[1].strip()
+                        product = parts[2].strip()
+                        quantity = int(parts[3].strip())
+                        price = float(parts[4].strip().replace("$", "").replace(",", ""))
+
+                        # Create the item list using these variables
+                        item = [id, manufacturer, product, quantity, price]
+
+                        # Add the item list to the inventory list
+                        inventory.append(item)
+
+                    except ValueError as e:
+                        # Handle any value conversion errors and display an error message
+                        print(f"Error parsing line '{line}': {e}")
+                else:
+                    # Print a message if the line doesn't have the correct number of parts
+                    print(f"Skipping malformed line: '{line}'")
+    except Exception as e:
+        # Handle file-related errors, such as file not found
+        print(f"Error reading file {file_path}: {e}")
+    finally:
+        file.close()
+
+    return inventory
