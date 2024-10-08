@@ -1,0 +1,9 @@
+def write_furniture_data(file_path, inventory):
+    try:
+        with open(file_path, 'w') as file:
+            for item in inventory:
+                # Assuming item is a list: [id, manufacturer, product, quantity, price]
+                line = f"{item[0]},{item[1]},{item[2]},{item[3]},{item[4]:.2f}\n"
+                file.write(line)
+    except Exception as e:
+        print(f"Error writing to file {file_path}: {e}")
