@@ -1,0 +1,129 @@
+import datetime
+import uuid  # A built-in library used to generate unique IDs
+
+def find_item(inventory, item_id):
+    # Search for an item in the inventory by its ID
+    for item in inventory:
+        if item[0] == item_id:  # Access ID from the 2D list (assuming ID is at index 0)
+            return item  # If ID matches return item
+    return None  # Return None if no matching item is found
+
+def purchase_from_supplier(inventory, item_id, quantity):
+    item = find_item(inventory, item_id)  # Find the item in the inventory
+    if item:
+        item[3] += quantity  # Access quantity from the 2D list (assuming quantity is at index 3) and update it
+        return item  
+    else:
+        print("Item not found.")  # Print an error message if the item is not found
+        return None  # Return None if the item is not found
+
+def sell_to_customer(inventory, item_id, quantity):
+    item = find_item(inventory, item_id) 
+    if item and item[3] >= quantity:  # Check if the item is found and there is sufficient stock
+        item[3] -= quantity  # Subtract the sold quantity from the inventory
+        return item 
+    else:
+        print("Insufficient stock or item not found.")  # Print an error message if there is insufficient stock or the item is not found
+        return None  # Return None if there is insufficient stock or the item is not found
+
+def generate_unique_bill_number():
+    """Generate a unique bill number based on timestamp and UUID."""
+    return f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:3]}"  # Format the bill number using current time and UUID
+
+def generate_combined_purchase_receipt(purchased_items, employee_name, employee_phone_number):
+    total_amount = sum(item[4] * quantity for item, quantity in purchased_items)  # Calculate the total amount from the list of purchased items (access price from the 2D list)
+    bill_number = generate_unique_bill_number()  # Generate a unique bill number
+    date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # Get the current date and time
+
+    # Create the header of the receipt
+    receipt = (
+        f"|--------------------------------------------------|\n"
+        f"|         PURCHASE INVOICE                         |\n"
+        f"|--------------------------------------------------|\n"
+        f" Bill No: {bill_number}\n"
+        f" Employee: {employee_name}\n"
+        f" Phone: {employee_phone_number}\n"
+        f" Date: {date_time}\n"
+        f" --------------------------------------------------|\n"
+    )
+    # Add each purchased item to the receipt
+    for item, quantity in purchased_items:
+        receipt += (
+            f" Product ID: {item[0]}\n"  
+            f" Manufacturer: {item[1]}\n"  
+            f" Product: {item[2]}\n"  
+            f" Quantity: {quantity}\n"
+            f" Unit Price: ${item[4]:.2f}\n" 
+            f"|--------------------------------------------------|\n"
+        )
+    # Add the total amount to the receipt
+    receipt += (
+        f" Total Amount: ${total_amount:.2f}\n"
+        f"|--------------------------------------------------|\n"
+    )
+
+    # Create a safe file name for the receipt
+    employee_name_safe = employee_name.replace(" ", "_")
+    receipt_file = f"purchase_receipt_{employee_name_safe}_{bill_number}.txt"
+
+    try:
+        # Write the receipt to the file
+        with open(receipt_file, 'w') as file:
+            file.write(receipt)
+        print(f"Purchase receipt generated: {receipt_file}")  # Print a success message
+    except Exception as e:
+        print(f"Error writing purchase receipt to {receipt_file}: {e}")  # Print an error message if writing fails
+
+def generate_combined_sales_receipt(sold_items, customer_name, customer_phone_number, customer_address):
+    total_amount = sum(item[4] * quantity for item, quantity in sold_items)  # Calculate the total amount from the list of sold items (access price from the 2D list)
+    vat_amount = total_amount * 0.13  # Calculate VAT (13% of total amount)
+    total_with_vat = total_amount + vat_amount  # Add VAT to the total amount
+    shipping_cost = 50.0  # Fixed shipping cost
+    total_with_shipping = total_with_vat + shipping_cost  # Add shipping cost to the total amount with VAT
+    bill_number = generate_unique_bill_number()  # Generate a unique bill number
+    date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # Get the current date and time
+
+    # Create the header of the sales receipt
+    receipt = (
+        f"|----------------------------------------------------------------|\n"
+        f"|                         SALES RECEIPT                          |\n"
+        f"|----------------------------------------------------------------|\n"
+        f" Bill No: {bill_number}\n"
+        f" Customer: {customer_name}\n"
+        f" Phone: {customer_phone_number}\n"
+        f" Address: {customer_address}\n"
+        f" Date: {date_time}\n"
+        f"|----------------------------------------------------------------|\n"
+    )
+    # Add each sold item to the receipt
+    for item, quantity in sold_items:
+        receipt += (
+            f" Product ID: {item[0]}\n" 
+            f" Manufacturer: {item[1]}\n"  
+            f" Product: {item[2]}\n"  
+            f" Quantity: {quantity}\n"
+            f" Unit Price: ${item[4]:.2f}\n" 
+            f"|----------------------------------------------------------------|\n"
+        )
+    # Add the total amount, VAT, and shipping cost to the receipt
+    receipt += (
+        f" Total Amount (without VAT): ${total_amount:.2f}\n"
+        f" VAT (13%): ${vat_amount:.2f}\n"
+        f" Total Amount (with VAT): ${total_with_vat:.2f}\n"
+        f" Shipping Cost: ${shipping_cost:.2f}\n"
+        f"|----------------------------------------------------------------|\n"
+        f" Total Amount (with VAT and Shipping): ${total_with_shipping:.2f}\n"
+        f"|----------------------------------------------------------------|\n"
+    )
+
+    # Create a safe file name for the receipt
+    customer_name_safe = customer_name.replace(" ", "_")
+    receipt_file = f"sales_receipt_{customer_name_safe}_{bill_number}.txt"
+
+    try:
+        # Write the receipt to the file
+        with open(receipt_file, 'w') as file:
+            file.write(receipt)
+        print(f"Sales receipt generated: {receipt_file}")  # Print a success message
+    except Exception as e:
+        print(f"Error writing sales receipt to {receipt_file}: {e}")  # Print an error message if writing fails
